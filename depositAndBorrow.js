@@ -16,31 +16,39 @@ const cometAbi = [
   "function getAssetInfoByAddress(address asset) view returns (tuple(uint8 offset, address asset, address priceFeed, uint256 scale, uint256 borrowCollateralFactor, uint256 liquidateCollateralFactor, uint256 liquidationFactor, uint128 supplyCap))",
   "function isBorrowPaused() view returns (bool)",
 ];
+
 const wethAbi = [
   "function deposit() payable",
   "function approve(address,uint256)",
   "function balanceOf(address) view returns (uint256)",
 ];
+
 async function main() {
-  const provider = new ethers.JsonRpcProvider(RPC_URL); // Alchemy WebSocket URL
+  
+   const provider = new ethers.JsonRpcProvider(RPC_URL); // Alchemy WebSocket URL
    const wallet = new ethers.Wallet(PK, provider);
      
   const comet = new ethers.Contract(COMET_ADDR, cometAbi, wallet);
   const weth = new ethers.Contract(WETH_ADDR, wethAbi, wallet); // Check Comet state
+  
   const usdcAddr = await comet.baseToken();
   const usdcReserves = await comet.getCollateralReserves(usdcAddr);
-  console.log("USDC reserves:", ethers.formatUnits(usdcReserves, 6)); // Deposit 1 ETH to get WETH
+  console.log("USDC reserves:", ethers.formatUnits(usdcReserves, 6));
+  // Deposit 1 ETH to get WETH
   await weth.deposit({ value: ethers.parseEther("1") });
   console.log(
     "WETH balance:",
     ethers.formatEther(await weth.balanceOf(testAccount))
-  ); // Approve Comet to spend WETH
+  ); 
+  // Approve Comet to spend WETH
   await weth.approve(COMET_ADDR, ethers.parseEther("1"));
-  console.log("Approved WETH for Comet"); // Supply 1 WETH as collateral
+  console.log("Approved WETH for Comet"); 
+  // Supply 1 WETH as collateral
   await comet.supply(WETH_ADDR, ethers.parseEther("1"));
-  console.log("Supplied 1 WETH to Comet"); // Check collateral factors and price feed
+  console.log("Supplied 1 WETH to Comet"); 
+  // Check collateral factors and price feed
   const assetInfo = await comet.getAssetInfoByAddress(WETH_ADDR);
-  console.log(
+   console.log(
     "WETH borrow collateral factor:",
     ethers.formatUnits(assetInfo.borrowCollateralFactor, 18)
   );
@@ -48,7 +56,8 @@ async function main() {
     "WETH liquidate collateral factor:",
     ethers.formatUnits(assetInfo.liquidateCollateralFactor, 18)
   );
-  console.log("WETH price feed:", assetInfo.priceFeed); // Get current WETH price
+  console.log("WETH price feed:", assetInfo.priceFeed); 
+  // Get current WETH price
   const priceFeedAbi = [
     "function latestRoundData() view returns (uint80, int256, uint256, uint256, uint80)",
   ];
@@ -58,14 +67,16 @@ async function main() {
     provider
   );
   const latestPrice = (await priceFeedContract.latestRoundData())[1];
-  console.log("Current WETH price:", ethers.formatUnits(latestPrice, 8)); // Borrow 2000 USDC
+  console.log("Current WETH price:", ethers.formatUnits(latestPrice, 8));
+  // Borrow 2000 USDC
   try {
     await comet.withdraw(usdcAddr, ethers.parseUnits("2000", 6));
     console.log("Borrowed 2000 USDC");
   } catch (err) {
     console.error("Borrow failed:", err);
     return;
-  } // Check if liquidatable
+  } 
+  // Check if liquidatable
   let isLiquidatable = await comet.isLiquidatable(testAccount);
   console.log("Is liquidatable after 2000 USDC borrow:", isLiquidatable)
    
