@@ -1,9 +1,7 @@
 const { ethers } = require("ethers");
 require("dotenv").config();
-const {
-  impersonateAccount,
-  setBalance,
-} = require("@nomicfoundation/hardhat-network-helpers");
+// This Script is for depositing ETH, borrowing USDC, and checking liquidation status on Comet
+// You can change the tokens and amounts as needed including the price feed
 //const RPC_URL = process.env.ALCHEMY_MAINNET_WS; // Alchemy WebSocket URL
 //const PK = process.env.PRIVATE_KEY;
 const COMET_ADDR = "0xc3d688B66703497DAA19211EEdff47f25384cdc3";
@@ -24,15 +22,11 @@ const wethAbi = [
   "function balanceOf(address) view returns (uint256)",
 ];
 async function main() {
-  //const provider = new ethers.JsonRpcProvider(RPC_URL); // Alchemy WebSocket URL
-   //const wallet = new ethers.Wallet(PK, provider);
-    const provider = new ethers.JsonRpcProvider("http://localhost:8545"); // Alchemy WebSocket URL
-  const testAccount = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
-  await impersonateAccount(testAccount);
-  await setBalance(testAccount, ethers.parseEther("10"));
-  const signer = await provider.getSigner(testAccount);
-  const comet = new ethers.Contract(COMET_ADDR, cometAbi, signer);
-  const weth = new ethers.Contract(WETH_ADDR, wethAbi, signer); // Check Comet state
+  const provider = new ethers.JsonRpcProvider(RPC_URL); // Alchemy WebSocket URL
+   const wallet = new ethers.Wallet(PK, provider);
+     
+  const comet = new ethers.Contract(COMET_ADDR, cometAbi, wallet);
+  const weth = new ethers.Contract(WETH_ADDR, wethAbi, wallet); // Check Comet state
   const usdcAddr = await comet.baseToken();
   const usdcReserves = await comet.getCollateralReserves(usdcAddr);
   console.log("USDC reserves:", ethers.formatUnits(usdcReserves, 6)); // Deposit 1 ETH to get WETH
@@ -64,16 +58,16 @@ async function main() {
     provider
   );
   const latestPrice = (await priceFeedContract.latestRoundData())[1];
-  console.log("Current WETH price:", ethers.formatUnits(latestPrice, 8)); // Borrow 8000 USDC
+  console.log("Current WETH price:", ethers.formatUnits(latestPrice, 8)); // Borrow 2000 USDC
   try {
-    await comet.withdraw(usdcAddr, ethers.parseUnits("8000", 6));
-    console.log("Borrowed 8000 USDC");
+    await comet.withdraw(usdcAddr, ethers.parseUnits("2000", 6));
+    console.log("Borrowed 2000 USDC");
   } catch (err) {
     console.error("Borrow failed:", err);
     return;
   } // Check if liquidatable
   let isLiquidatable = await comet.isLiquidatable(testAccount);
-  console.log("Is liquidatable after 8000 USDC borrow:", isLiquidatable)
+  console.log("Is liquidatable after 2000 USDC borrow:", isLiquidatable)
    
   return testAccount;
 }

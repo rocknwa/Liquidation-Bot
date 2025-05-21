@@ -1,6 +1,8 @@
 require("dotenv").config();
 const { ethers } = require("ethers");
 
+// This script monitors the Comet protocol for liquidatable accounts and executes liquidation transactions
+// using a liquidator contract. It also handles WebSocket connection issues and dynamically tracks accounts.
 const RPC_URL = process.env.ALCHEMY_MAINNET_WS; // Alchemy WebSocket URL
 const PK = process.env.PRIVATE_KEY;
 const LIQUIDATOR = process.env.LIQUIDATOR_CONTRACT;
@@ -27,7 +29,7 @@ const quoterAbi = [
 
 async function main() {
   // Provider & Wallet
-  const provider = new ethers.WebSocketProvider("http://localhost:8545"); // Local Hardhat node
+  const provider = new ethers.WebSocketProvider(RPC_URL); 
   const wallet = new ethers.Wallet(PK, provider);
 
   // Contracts
