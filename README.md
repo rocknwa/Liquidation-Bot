@@ -192,5 +192,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ---
 
 _Built with 💻 and ☕ by Therock Ani._
-**Email:** anitherock44@gmail.com
-I am a passionate blockchain developer with expertise in Ethereum, DeFi protocols, and smart contract engineering. I am open to opportunities where I can contribute to innovative blockchain projects or help clients integrate DeFi solutions.
+- **Email:** anitherock44@gmail.com
+- I am a passionate blockchain developer with expertise in Ethereum, DeFi protocols, and smart contract engineering.
+- I am open to opportunities where I can contribute to innovative blockchain projects or help clients integrate DeFi solutions.
